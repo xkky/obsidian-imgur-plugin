@@ -16,10 +16,10 @@ export default function buildUploaderFrom(
       return undefined
     }
 
-    return new ImgurAuthenticatedUploader(new AuthenticatedImgurClient(accessToken))
+    return new ImgurAuthenticatedUploader(new AuthenticatedImgurClient(accessToken, settings.proxy))
   } else if (settings.uploadStrategy === 'ANONYMOUS_IMGUR') {
     if (settings.clientId) {
-      return new ImgurAnonymousUploader(settings.clientId)
+      return new ImgurAnonymousUploader(settings.clientId, settings.proxy)
     } else {
       return undefined
     }

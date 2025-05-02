@@ -8,9 +8,10 @@ import ImageUploader from '../ImageUploader'
 
 export default class ImgurAnonymousUploader implements ImageUploader {
   private readonly clientId!: string
-
-  constructor(clientId: string) {
+  private proxy!: string
+  constructor(clientId: string, proxy: string) {
     this.clientId = clientId
+    this.proxy = proxy
   }
 
   async upload(image: File): Promise<string> {
@@ -18,7 +19,7 @@ export default class ImgurAnonymousUploader implements ImageUploader {
     requestData.append('image', image)
 
     const request = {
-      url: `${IMGUR_API_BASE}/image`,
+      url: `${this.proxy ? this.proxy + '/3' : IMGUR_API_BASE}/image`,
       method: 'POST',
       headers: { Authorization: `Client-ID ${this.clientId}` },
       ...(await prepareMultipartRequestPiece(requestData)),
@@ -30,6 +31,7 @@ export default class ImgurAnonymousUploader implements ImageUploader {
     if (resp.status >= 400) {
       handleImgurErrorResponse(resp)
     }
-    return (resp.json as ImgurPostData).data.link
+    const link = (resp.json as ImgurPostData).data.link
+    return this.proxy ? link.replace('https://i.imgur.com', this.proxy) : link
   }
 }

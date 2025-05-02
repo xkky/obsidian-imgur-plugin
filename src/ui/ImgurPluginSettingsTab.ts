@@ -1,11 +1,11 @@
 import { App, DropdownComponent, Notice, PluginSettingTab, Setting } from 'obsidian'
 
-import ImgurPlugin from '../ImgurPlugin'
-import { UploadStrategies, type UploadStrategy } from '../UploadStrategy'
 import { IMGUR_ACCESS_TOKEN_LOCALSTORAGE_KEY } from '../imgur/constants'
+import ImgurPlugin from '../ImgurPlugin'
 import ApiError from '../uploader/ApiError'
-import ImgurAuthModal from './ImgurAuthModal'
+import { UploadStrategies, type UploadStrategy } from '../UploadStrategy'
 import ImgurAuthenticationStatusItem from './ImgurAuthenticationStatus'
+import ImgurAuthModal from './ImgurAuthModal'
 import { NewAlbumModal } from './NewAlbumModal'
 
 export default class ImgurPluginSettingsTab extends PluginSettingTab {
@@ -85,6 +85,7 @@ export default class ImgurPluginSettingsTab extends PluginSettingTab {
   private async drawSettings(parentEl: HTMLElement) {
     parentEl.empty()
     this.drawClientIdField(parentEl)
+    this.drawUploadProxyField(parentEl)
     if (this.plugin.settings.uploadStrategy === 'AUTHENTICATED_IMGUR') {
       await this.createAuthenticationInfoBlock(parentEl)
 
@@ -104,6 +105,22 @@ export default class ImgurPluginSettingsTab extends PluginSettingTab {
           .onChange((value) => {
             this.plugin.settings.clientId = value
             this.enableOrDisableAuthenticationButton()
+          }),
+      )
+  }
+
+  // 设置代理modal信息
+  private drawUploadProxyField(containerEl: HTMLElement) {
+    new Setting(containerEl)
+      .setName('Proxy server')
+      .setTooltip(`set proxy server for uploader`, { delay: 1 })
+      .setDesc(`set proxy server for uploader`)
+      .addText((text) =>
+        text
+          .setPlaceholder('Enter your proxy server')
+          .setValue(this.plugin.settings.proxy)
+          .onChange((value) => {
+            this.plugin.settings.proxy = value
           }),
       )
   }

@@ -21,14 +21,18 @@ export function handleImgurErrorResponse(resp: RequestUrlResponse): void {
 export default class AuthenticatedImgurClient {
   private readonly accessToken!: string
   private authenticatedUser?: string
+  private proxy?: string
 
-  constructor(accessToken: string) {
+  constructor(accessToken: string, proxy: string) {
     this.accessToken = accessToken
+    this.proxy = proxy
     void this.accountInfo()
       .then((r) => (this.authenticatedUser = r.data.url))
       .catch((e) => console.error('Failed to get info about currently authenticated user!', e))
   }
-
+  getProxy() {
+    return this.proxy
+  }
   async accountInfo(): Promise<AccountInfo> {
     const req = {
       url: `${IMGUR_API_BASE}/account/me`,
@@ -54,7 +58,7 @@ export default class AuthenticatedImgurClient {
     }
 
     const request = {
-      url: `${IMGUR_API_BASE}/image`,
+      url: `${this.proxy ? this.proxy + '/3' : IMGUR_API_BASE}/image`,
       method: 'POST',
       headers: { Authorization: `Bearer ${this.accessToken}` },
       ...(await prepareMultipartRequestPiece(requestData)),
